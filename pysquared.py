@@ -4,7 +4,7 @@ import os.environ
 
 
 # ~~~ TRANSACTION METHODS ~~~
-def transaction_lookup(location_id=None, transaction_id=None):
+def transaction_lookup(location_id, transaction_id):
     url = "https://connect.squareup.com/v2/locations/%s/transactions/%s" % (location_id, transaction_id)
     return execute("GET", url)
 
@@ -39,7 +39,7 @@ def transaction_charge(location_id, order_data, card_nonce=None, customer_id=Non
             return False
     return execute("POST", url, body_data)
 
-def transaction_void(location_id=None, transaction_id=None):
+def transaction_void(location_id, transaction_id):
     url = "https://connect.squareup.com/v2/locations/%s/transactions/%s/void" % (location_id, transaction_id)
     transaction = transaction_lookup(location_id, transaction_id)
     for tender in transaction.tenders:
@@ -54,7 +54,7 @@ def transaction_void(location_id=None, transaction_id=None):
         }
     return execute("POST", url, body_data)
 
-def transaction_refund(location_id=None, transaction_id=None):
+def transaction_refund(location_id, transaction_id):
     url = "https://connect.squareup.com/v2/locations/%s/transactions/%s/refund" % (location_id, transaction_id)
     return execute("POST", url, body_data)
 
@@ -84,7 +84,7 @@ def customer_create(customer_data):
     }
     return execute("POST", url, body_data)
 
-def customer_update(customer_id, customer_data={}):
+def customer_update(customer_id, customer_data):
     url = "https://connect.squareup.com/v2/customers/%s" % customer_id
     return execute("PUT", url, body_data)
 
