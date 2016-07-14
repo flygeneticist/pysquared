@@ -67,7 +67,6 @@ def customer_lookup(customer_id):
 
 def customer_create(customer_data):
     url = "https://connect.squareup.com/v2/customers/"
-    if {} customer_data
     body_data = {
       "given_name": customer_data.name_first,
       "family_name": customer_data.name_last,

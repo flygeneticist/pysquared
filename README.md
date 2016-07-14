@@ -5,7 +5,7 @@ Square eCommerce API wrapper for Python Web Applications.
 ###Customer Data Object:
 Pass a python dictionary, built from order form and/or database data, to complete a customer creation:
 
-- Only two of the following fields are required for a customer:
+- Only one of the following fields are required for a customer:
     - given_name
     - family_name
     - company_name
