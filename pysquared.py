@@ -1,4 +1,5 @@
 import unirest
+import uuid
 
 
 # ~~~ TRANSACTION METHODS ~~~
@@ -8,6 +9,31 @@ def transaction_lookup(location_id=None, transaction_id=None):
 
 def transaction_charge(location_id, card_nonce=None, customer_id=None, delay=False, chargeback_protection=False):
     url = "https://connect.squareup.com/v2/locations/%s/transactions" % location_id
+    data = {str(uuid.uuid4().int),
+        "shipping_address": {
+            "address_line_1": "123 Main St",
+            "locality": "San Francisco",
+            "administrative_district_level_1": "CA",
+            "postal_code": "94114",
+            "country": "US"
+        },
+        "billing_address": {
+            "address_line_1": "500 Electric Ave",
+            "address_line_2": "Suite 600",
+            "administrative_district_level_1": "NY",
+            "locality": "New York",
+            "postal_code": "10003",
+            "country": "US"
+        },
+        "amount_money": {
+            "amount": 5000,
+            "currency": "USD"
+        },
+        "card_nonce": card_nonce,
+        "reference_id": "some optional reference id",
+        "note": "some optional note",
+        "delay_capture": delay
+    }
     if card_nonce:
         # charge via nonce 
         return True
@@ -22,9 +48,9 @@ def transaction_void(location_id=None, transaction_id=None):
     transaction = transaction_lookup(location_id, transaction_id)
     for tender in transaction.tenders:
         data = {
-            "idempotency_key": "YOUR_IDEMPOTENCY_KEY",
+            "idempotency_key": str(uuid.uuid4().int),
             "tender_id": tender.id,
-            "reason": "customer refund",
+            "reason": "Refund via API",
             "amount_money": {
                 "amount": tender.amount_money.amount,
                 "currency": tender.amount_money.currency
@@ -80,14 +106,7 @@ def card_create(customer_id, card_nonce):
     customer = customer_lookup(customer_id)
     data = {
       "card_nonce": card_nonce,
-      "billing_address": {
-        "address_line_1": customer.address_line_1,
-        "address_line_2": customer.address_line_1,
-        "locality": customer.city,
-        "administrative_district_level_1": customer.administrative_district_level_1,
-        "postal_code": customer.postal_code,
-        "country": customer.country
-      },
+      "billing_address": customer.address,
       "cardholder_name": customer.given_name + " " + customer.family_name
     }
     # return card ID from Square server
