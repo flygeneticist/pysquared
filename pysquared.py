@@ -38,7 +38,7 @@ def transaction_charge(location_id, order_data, card_nonce=None, customer_id=Non
             return False
     return execute("POST", url, body_data)
 
-def transaction_void(location_id, transaction_id):
+def transaction_void(location_id, transaction_id, reason=False):
     url = "https://connect.squareup.com/v2/locations/%s/transactions/%s/void" % (location_id, transaction_id)
     response = []
     transaction = transaction_lookup(location_id, transaction_id)
@@ -46,7 +46,7 @@ def transaction_void(location_id, transaction_id):
         body_data = {
             "idempotency_key": str(uuid.uuid4().int),
             "tender_id": tender["id"],
-            "reason": "Refund via API",
+            "reason": "Refund via API" if reason == False else reason,
             "amount_money": {
                 "amount": tender["amount_money"]["amount"],
                 "currency": tender["amount_money"]["currency"]
@@ -67,22 +67,7 @@ def customer_lookup(customer_id):
 
 def customer_create(customer_data):
     url = "https://connect.squareup.com/v2/customers/"
-    body_data = {
-      "given_name": customer_data.name_first,
-      "family_name": customer_data.name_last,
-      "email_address": customer_data.email,
-      "address": {
-        "address_line_1": customer_data.address1,
-        "address_line_2": customer_data.address2,
-        "locality": customer_data.city,
-        "administrative_district_level_1": customer_data.state,
-        "postal_code": customer_data.zipcode,
-        "country": customer_data.country
-      },
-      "phone_number": customer_data.phone,
-      "reference_id": "YOUR_REFERENCE_ID",
-      "note": ""
-    }
+    body_data = customer_data
     return execute("POST", url, body_data)
 
 def customer_update(customer_id, customer_data):
@@ -99,12 +84,12 @@ def card_lookup(customer_id):
     url = "https://connect.squareup.com/v2/customers/%s/cards" % customer_id
     return execute("GET", url)
  
-def card_create(customer_id, card_nonce):
+def card_create(customer_id, card_nonce, billing_address=False):
     url = "https://connect.squareup.com/v2/customers/%s/cards" % customer_id
     customer = customer_lookup(customer_id)
     body_data = {
       "card_nonce": card_nonce,
-      "billing_address": customer["address"],
+      "billing_address": customer["address"] if billing_address == False else billing_address,
       "cardholder_name": customer["given_name"] + " " + customer["family_name"]
     }
     return execute("POST", url, body_data) 
