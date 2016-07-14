@@ -7,9 +7,10 @@ def transaction_lookup(location_id=None, transaction_id=None):
     url = "https://connect.squareup.com/v2/locations/%s/transactions/%s" % (location_id, transaction_id)
     return True
 
-def transaction_charge(location_id, card_nonce=None, customer_id=None, delay=False, chargeback_protection=False):
+def transaction_charge(location_id, order_data, card_nonce=None, customer_id=None, delay=False, chargeback_protection=False):
     url = "https://connect.squareup.com/v2/locations/%s/transactions" % location_id
-    data = {str(uuid.uuid4().int),
+    data = {
+        "idempotency_key": str(uuid.uuid4().int),
         "shipping_address": {
             "address_line_1": "123 Main St",
             "locality": "San Francisco",
@@ -29,18 +30,29 @@ def transaction_charge(location_id, card_nonce=None, customer_id=None, delay=Fal
             "amount": 5000,
             "currency": "USD"
         },
-        "card_nonce": card_nonce,
+        "buyer_email_address": "",
         "reference_id": "some optional reference id",
         "note": "some optional note",
         "delay_capture": delay
     }
     if card_nonce:
         # charge via nonce 
-        return True
+        data["card_nonce"] = card_nonce
     else if customer_id:
-        # charge via stored customer / card data
+        # charge via stored customer & card data
         customer = customer_lookup(customer_id)
-        return True
+        card = card_lookup(customer_id)
+        data["customer_id"] = customer_id
+        data["customer_card_id"] = card.id
+        data["shipping_address"] = customer.address
+        data["billing_address"] = card.billing_address
+    if chargeback_protection: 
+        if data.buyer_email_address == "":
+            return False
+        if (data.shipping_address or data.billing_address):
+            return True
+        else: 
+            return False
     return False
 
 def transaction_void(location_id=None, transaction_id=None):
