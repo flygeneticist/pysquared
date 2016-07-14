@@ -2,6 +2,7 @@ import unirest
 import uuid
 import os.environ
 
+
 # ~~~ TRANSACTION METHODS ~~~
 def transaction_lookup(location_id=None, transaction_id=None):
     url = "https://connect.squareup.com/v2/locations/%s/transactions/%s" % (location_id, transaction_id)
