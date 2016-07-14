@@ -112,14 +112,13 @@ def card_delete(customer_id, card_id):
     return execute("DELETE", url, body_data)
 
 
-# ~~~ CREDIT-CARD METHODS ~~~
+# ~~~ REST API HANDLING METHODS ~~~
 def execute(mthd, url, body_data):
     try:
         access_token = os.environ['SQUARE_ACCESS_TOKEN']
     except KeyError:
         print "Please set the server environment variable SQUARE_ACCESS_TOKEN to that of your Square account."
         sys.exit(1)
-
     if mthd == "GET":
         response = unirest.get(url, headers={ "Authorization": "Bearer "+access_token, "Accept": "application/json" }, params=body_data)
     elif mthd == "POST":
@@ -128,5 +127,4 @@ def execute(mthd, url, body_data):
         response = unirest.put(url, headers={ "Authorization": "Bearer "+access_token, "Accept": "application/json", "Content-Type": "application/json" }, params=body_data)
     elif mthd == "DELETE":
         response = unirest.delete(url, headers={ "Authorization": "Bearer "+access_token, "Accept": "application/json" }, params=body_data)
-    
     return response.body
