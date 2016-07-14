@@ -19,8 +19,7 @@ def transaction_charge(location_id, order_data, card_nonce=None, customer_id=Non
         "delay_capture": delay
     }
     if card_nonce and customer_id:
-        print "Exception: Cannot "
-        sys.exit(1)
+        raise IOError("Cannot process a transaction using both options. Choose one or the other.")
     elif card_nonce:
         data["card_nonce"] = card_nonce
     elif customer_id:
@@ -66,6 +65,7 @@ def customer_lookup(customer_id):
 
 def customer_create(customer_data):
     url = "https://connect.squareup.com/v2/customers/"
+    if {} customer_data
     body_data = {
       "given_name": customer_data.name_first,
       "family_name": customer_data.name_last,
@@ -118,8 +118,7 @@ def execute(mthd, url, body_data):
     try:
         access_token = os.environ['SQUARE_ACCESS_TOKEN']
     except KeyError:
-        print "Please set the server environment variable SQUARE_ACCESS_TOKEN to that of your Square account."
-        sys.exit(1)
+        raise Exception("Set the server environment variable SQUARE_ACCESS_TOKEN to that of your Square account.")
     if mthd == "GET":
         response = unirest.get(url, headers={ "Authorization": "Bearer "+access_token, "Accept": "application/json" })
     elif mthd == "POST":
