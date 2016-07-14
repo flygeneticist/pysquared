@@ -19,16 +19,16 @@ def transaction_charge(location_id, order_data, card_nonce=None, customer_id=Non
         "delay_capture": delay
     }
     if card_nonce and customer_id:
-        raise IOError("Cannot process a transaction using both options. Choose one or the other.")
+        raise Exception("Cannot process a transaction using both options. Choose one or the other.")
     elif card_nonce:
-        data["card_nonce"] = card_nonce
+        body_data["card_nonce"] = card_nonce
     elif customer_id:
         customer = customer_lookup(customer_id)
         card = card_lookup(customer_id)
-        data["customer_id"] = customer_id
-        data["customer_card_id"] = card["id"]
-        data["shipping_address"] = customer["address"]
-        data["billing_address"] = card["billing_address"]
+        body_data["customer_id"] = customer_id
+        body_data["customer_card_id"] = card["id"]
+        body_data["shipping_address"] = customer["address"]
+        body_data["billing_address"] = card["billing_address"]
     if chargeback_protection: 
         if data.buyer_email_address == "":
             return False
@@ -40,6 +40,7 @@ def transaction_charge(location_id, order_data, card_nonce=None, customer_id=Non
 
 def transaction_void(location_id, transaction_id):
     url = "https://connect.squareup.com/v2/locations/%s/transactions/%s/void" % (location_id, transaction_id)
+    response = []
     transaction = transaction_lookup(location_id, transaction_id)
     for tender in transaction.tenders:
         body_data = {
@@ -51,7 +52,8 @@ def transaction_void(location_id, transaction_id):
                 "currency": tender["amount_money"]["currency"]
             }
         }
-    return execute("POST", url, body_data)
+        response += execute("POST", url, body_data)
+    return response
 
 def transaction_refund(location_id, transaction_id):
     url = "https://connect.squareup.com/v2/locations/%s/transactions/%s/refund" % (location_id, transaction_id)
