@@ -5,7 +5,7 @@ import os.environ
 # ~~~ TRANSACTION METHODS ~~~
 def transaction_lookup(location_id=None, transaction_id=None):
     url = "https://connect.squareup.com/v2/locations/%s/transactions/%s" % (location_id, transaction_id)
-    return execute("GET", url, body_data)
+    return execute("GET", url)
 
 def transaction_charge(location_id, order_data, card_nonce=None, customer_id=None, delay=False, chargeback_protection=False):
     url = "https://connect.squareup.com/v2/locations/%s/transactions" % location_id
@@ -89,13 +89,13 @@ def customer_update(customer_id, customer_data={}):
 
 def customer_delete(customer_id):
     url = "https://connect.squareup.com/v2/customers/%s" % customer_id
-    return execute("DELETE", url, body_data)
+    return execute("DELETE", url)
 
 
 # ~~~ CREDIT-CARD METHODS ~~~
 def card_lookup(customer_id):
     url = "https://connect.squareup.com/v2/customers/%s/cards" % customer_id
-    return execute("GET", url, body_data)
+    return execute("GET", url)
  
 def card_create(customer_id, card_nonce):
     url = "https://connect.squareup.com/v2/customers/%s/cards" % customer_id
@@ -109,7 +109,7 @@ def card_create(customer_id, card_nonce):
 
 def card_delete(customer_id, card_id):
     url = "https://connect.squareup.com/v2/customers/%s/cards/%s" % (customer_id, card_id)
-    return execute("DELETE", url, body_data)
+    return execute("DELETE", url)
 
 
 # ~~~ REST API HANDLING METHODS ~~~
@@ -120,11 +120,11 @@ def execute(mthd, url, body_data):
         print "Please set the server environment variable SQUARE_ACCESS_TOKEN to that of your Square account."
         sys.exit(1)
     if mthd == "GET":
-        response = unirest.get(url, headers={ "Authorization": "Bearer "+access_token, "Accept": "application/json" }, params=body_data)
+        response = unirest.get(url, headers={ "Authorization": "Bearer "+access_token, "Accept": "application/json" })
     elif mthd == "POST":
         response = unirest.post(url, headers={ "Authorization": "Bearer "+access_token, "Accept": "application/json", "Content-Type": "application/json" }, params=body_data)
     elif mthd == "PUT":
         response = unirest.put(url, headers={ "Authorization": "Bearer "+access_token, "Accept": "application/json", "Content-Type": "application/json" }, params=body_data)
     elif mthd == "DELETE":
-        response = unirest.delete(url, headers={ "Authorization": "Bearer "+access_token, "Accept": "application/json" }, params=body_data)
+        response = unirest.delete(url, headers={ "Authorization": "Bearer "+access_token, "Accept": "application/json" })
     return response.body
