@@ -105,7 +105,6 @@ def card_create(customer_id, card_nonce):
       "billing_address": customer["address"],
       "cardholder_name": customer["given_name"] + " " + customer["family_name"]
     }
-    # return card ID from Square server
     return execute("POST", url, body_data) 
 
 def card_delete(customer_id, card_id):
