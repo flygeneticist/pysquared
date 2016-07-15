@@ -12,12 +12,21 @@ def transaction_charge(location_id, order_data, card_nonce=None, customer_id=Non
     url = "https://connect.squareup.com/v2/locations/%s/transactions" % location_id
     body_data = {
         "idempotency_key": str(uuid.uuid4().int),
-        "shipping_address": order_data["shipping_address"],
-        "billing_address": order_data["billing_address"],
-        "amount_money": order_data["amount"],
-        "buyer_email_address": order_data["email"],
+        "amount_money": order_data["amount_money"],
         "delay_capture": delay
     }
+    try:
+        body_data["shipping_address"] = order_data["shipping_address"]
+    except:
+        pass
+    try:
+        body_data["billing_address"] = order_data["billing_address"]
+    except:
+        pass
+    try:
+        body_data["buyer_email_address"] = order_data["buyer_email_address"]
+    except:
+        pass
     if card_nonce and customer_id:
         raise Exception("Cannot process a transaction using both options. Choose one or the other.")
     elif card_nonce:
