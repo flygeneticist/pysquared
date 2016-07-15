@@ -15,18 +15,11 @@ def transaction_charge(location_id, order_data, card_nonce=None, customer_id=Non
         "amount_money": order_data["amount_money"],
         "delay_capture": delay
     }
-    try:
-        body_data["shipping_address"] = order_data["shipping_address"]
-    except:
-        pass
-    try:
-        body_data["billing_address"] = order_data["billing_address"]
-    except:
-        pass
-    try:
-        body_data["buyer_email_address"] = order_data["buyer_email_address"]
-    except:
-        pass
+    for i in ["shipping_address", "billing_address", "buyer_email_address"]:
+        try:
+            body_data[i] = order_data[i]
+        except:
+            pass
     if card_nonce and customer_id:
         raise Exception("Cannot process a transaction using both options. Choose one or the other.")
     elif card_nonce:
@@ -38,8 +31,8 @@ def transaction_charge(location_id, order_data, card_nonce=None, customer_id=Non
         body_data["customer_card_id"] = card["id"]
         body_data["shipping_address"] = customer["address"]
         body_data["billing_address"] = card["billing_address"]
-    if chargeback_protection: 
-        if data.buyer_email_address == "":
+    if chargeback_protection:
+        if body_data.buyer_email_address == "":
             raise Exception("Email Address must be provided when Chargeback Protection is set to True.")
         if (data.shipping_address or data.billing_address):
             pass
