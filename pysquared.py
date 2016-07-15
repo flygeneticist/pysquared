@@ -31,11 +31,11 @@ def transaction_charge(location_id, order_data, card_nonce=None, customer_id=Non
         body_data["billing_address"] = card["billing_address"]
     if chargeback_protection: 
         if data.buyer_email_address == "":
-            return False
+            raise Exception("Email Address must be provided when Chargeback Protection is set to True.")
         if (data.shipping_address or data.billing_address):
             pass
         else: 
-            return False
+            raise Exception("Either a Billing or Shipping Address must be provided when Chargeback Protection is set to True.")
     return execute("POST", url, body_data)
 
 def transaction_void(location_id, transaction_id):
