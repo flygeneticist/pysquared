@@ -38,15 +38,19 @@ def transaction_charge(location_id, order_data, card_nonce=None, customer_id=Non
             return False
     return execute("POST", url, body_data)
 
-def transaction_void(location_id, transaction_id, reason=False):
+def transaction_void(location_id, transaction_id):
     url = "https://connect.squareup.com/v2/locations/%s/transactions/%s/void" % (location_id, transaction_id)
+    return execute("POST", url, body_data)
+
+def transaction_refund(location_id, transaction_id, reason=False):
+    url = "https://connect.squareup.com/v2/locations/%s/transactions/%s/refund" % (location_id, transaction_id)
     response = []
     transaction = transaction_lookup(location_id, transaction_id)
     for tender in transaction.tenders:
         body_data = {
             "idempotency_key": str(uuid.uuid4().int),
             "tender_id": tender["id"],
-            "reason": "Refund via API" if reason == False else reason,
+            "reason": "Refund via API" if reason == False else str(reason),
             "amount_money": {
                 "amount": tender["amount_money"]["amount"],
                 "currency": tender["amount_money"]["currency"]
@@ -54,10 +58,6 @@ def transaction_void(location_id, transaction_id, reason=False):
         }
         response += execute("POST", url, body_data)
     return response
-
-def transaction_refund(location_id, transaction_id):
-    url = "https://connect.squareup.com/v2/locations/%s/transactions/%s/refund" % (location_id, transaction_id)
-    return execute("POST", url, body_data)
 
 
 # ~~~ CUSTOMER METHODS ~~~
