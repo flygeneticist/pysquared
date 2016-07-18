@@ -82,8 +82,12 @@ def customer_delete(customer_id):
 
 
 # ~~~ CREDIT-CARD METHODS ~~~
-def card_lookup(customer_id):
+def card_get_all(customer_id):
     url = "https://connect.squareup.com/v2/customers/%s/cards" % customer_id
+    return execute("GET", url)
+
+def card_get_one(customer_id, card_id):
+    url = "https://connect.squareup.com/v2/customers/%s/cards/%s" % (customer_id, card_id)
     return execute("GET", url)
  
 def card_create(customer_id, card_nonce, billing_address=False):
