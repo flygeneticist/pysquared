@@ -1,7 +1,6 @@
 import unirest
 import uuid
-import os.environ
-
+import json
 
 # ~~~ TRANSACTION METHODS ~~~
 def transaction_lookup(location_id, transaction_id):
@@ -65,11 +64,11 @@ def transaction_refund(location_id, transaction_id, reason=False):
 # ~~~ CUSTOMER METHODS ~~~
 def customer_lookup(customer_id):
     url = "https://connect.squareup.com/v2/customers/%s" % customer_id
-    return execute("POST", url, body_data)
+    return execute("GET", url)
 
 def customer_create(customer_data):
-    url = "https://connect.squareup.com/v2/customers/"
-    body_data = customer_data
+    url = "https://connect.squareup.com/v2/customers"
+    body_data = json.dumps(customer_data)
     return execute("POST", url, body_data)
 
 def customer_update(customer_id, customer_data):
@@ -90,14 +89,14 @@ def card_get_one(customer_id, card_id):
     url = "https://connect.squareup.com/v2/customers/%s/cards/%s" % (customer_id, card_id)
     return execute("GET", url)
  
-def card_create(customer_id, card_nonce, billing_address=False):
+def card_create(customer_id, card_nonce, billing_address):
     url = "https://connect.squareup.com/v2/customers/%s/cards" % customer_id
     customer = customer_lookup(customer_id)
-    body_data = {
+    body_data = json.dumps({
       "card_nonce": card_nonce,
-      "billing_address": customer["address"] if billing_address == False else billing_address,
-      "cardholder_name": customer["given_name"] + " " + customer["family_name"]
-    }
+      "billing_address": billing_address,
+      "cardholder_name": customer["customer"]["given_name"] + " " + customer["customer"]["family_name"]
+    })
     return execute("POST", url, body_data) 
 
 def card_delete(customer_id, card_id):
@@ -106,9 +105,9 @@ def card_delete(customer_id, card_id):
 
 
 # ~~~ REST API HANDLING METHODS ~~~
-def execute(mthd, url, body_data):
+def execute(mthd, url, body_data=None):
     try:
-        access_token = os.environ['SQUARE_ACCESS_TOKEN']
+        access_token = 'sq0atb-_ifJWXh-Jj15F004mRfJ6Q' #os.environ['SQUARE_ACCESS_TOKEN']
     except KeyError:
         raise Exception("Set the server environment variable SQUARE_ACCESS_TOKEN to that of your Square account.")
     if mthd == "GET":
