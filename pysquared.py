@@ -7,14 +7,10 @@ def transaction_lookup(location_id, transaction_id):
     url = "https://connect.squareup.com/v2/locations/%s/transactions/%s" % (location_id, transaction_id)
     return execute("GET", url)
 
-def transaction_charge(location_id, order_data, card_nonce=None, customer_id=None, delay=False, chargeback_protection=False):
+def transaction_charge(location_id, order_data, card_nonce=None, customer_id=None, card_id= False, delay=False):
     url = "https://connect.squareup.com/v2/locations/%s/transactions" % location_id
-    body_data = {
-        "idempotency_key": str(uuid.uuid4().int),
-        "amount_money": order_data["amount_money"],
-        "delay_capture": delay
-    }
-    for i in ["shipping_address", "billing_address", "buyer_email_address"]:
+    body_data = {"idempotency_key": str(uuid.uuid4().int), "delay_capture": delay}
+    for i in ["shipping_address", "billing_address", "buyer_email_address", "amount_money"]:
         try:
             body_data[i] = order_data[i]
         except:
@@ -25,19 +21,10 @@ def transaction_charge(location_id, order_data, card_nonce=None, customer_id=Non
         body_data["card_nonce"] = card_nonce
     elif customer_id:
         customer = customer_lookup(customer_id)
-        card = card_lookup(customer_id)
+        card = card_lookup(card_id)
         body_data["customer_id"] = customer_id
-        body_data["customer_card_id"] = card["id"]
-        body_data["shipping_address"] = customer["address"]
-        body_data["billing_address"] = card["billing_address"]
-    if chargeback_protection:
-        if body_data.buyer_email_address == "":
-            raise Exception("Email Address must be provided when Chargeback Protection is set to True.")
-        if (data.shipping_address or data.billing_address):
-            pass
-        else: 
-            raise Exception("Either a Billing or Shipping Address must be provided when Chargeback Protection is set to True.")
-    return execute("POST", url, body_data)
+        body_data["customer_card_id"] = card_id
+    return execute("POST", url, json.dumps(body_data))
 
 def transaction_void(location_id, transaction_id):
     url = "https://connect.squareup.com/v2/locations/%s/transactions/%s/void" % (location_id, transaction_id)
