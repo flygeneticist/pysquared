@@ -81,7 +81,7 @@ def card_create(customer_id, card_nonce, billing_address):
     print customer
     body_data = {
       "card_nonce": card_nonce,
-      "billing_address": dict(billing_address),
+      "billing_address": billing_address,
       "cardholder_name": customer["customer"]["given_name"] + " " + customer["customer"]["family_name"]
     }
     return execute("POST", url, json.dumps(body_data)) 
