@@ -78,9 +78,10 @@ def card_get_one(customer_id, card_id):
 def card_create(customer_id, card_nonce, billing_address):
     url = "https://connect.squareup.com/v2/customers/%s/cards" % customer_id
     customer = customer_lookup(customer_id)
+    print customer
     body_data = {
       "card_nonce": card_nonce,
-      "billing_address": billing_address,
+      "billing_address": dict(billing_address),
       "cardholder_name": customer["customer"]["given_name"] + " " + customer["customer"]["family_name"]
     }
     return execute("POST", url, json.dumps(body_data)) 
