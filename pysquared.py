@@ -28,7 +28,7 @@ def transaction_charge(location_id, order_data, card_nonce=None, customer_id=Non
 
 def transaction_void(location_id, transaction_id):
     url = "https://connect.squareup.com/v2/locations/%s/transactions/%s/void" % (location_id, transaction_id)
-    return execute("POST", url, body_data)
+    return execute("POST", url)
 
 def transaction_refund(location_id, transaction_id, reason=False):
     url = "https://connect.squareup.com/v2/locations/%s/transactions/%s/refund" % (location_id, transaction_id)
@@ -44,7 +44,7 @@ def transaction_refund(location_id, transaction_id, reason=False):
                 "currency": tender["amount_money"]["currency"]
             }
         }
-        response += execute("POST", url, body_data)
+        response += execute("POST", url, json.dumps(body_data))
     return response
 
 
@@ -55,12 +55,11 @@ def customer_lookup(customer_id):
 
 def customer_create(customer_data):
     url = "https://connect.squareup.com/v2/customers"
-    body_data = json.dumps(customer_data)
-    return execute("POST", url, body_data)
+    return execute("POST", url, json.dumps(customer_data))
 
 def customer_update(customer_id, customer_data):
     url = "https://connect.squareup.com/v2/customers/%s" % customer_id
-    return execute("PUT", url, body_data)
+    return execute("PUT", url, json.dumps(customer_data))
 
 def customer_delete(customer_id):
     url = "https://connect.squareup.com/v2/customers/%s" % customer_id
@@ -79,12 +78,12 @@ def card_get_one(customer_id, card_id):
 def card_create(customer_id, card_nonce, billing_address):
     url = "https://connect.squareup.com/v2/customers/%s/cards" % customer_id
     customer = customer_lookup(customer_id)
-    body_data = json.dumps({
+    body_data = {
       "card_nonce": card_nonce,
       "billing_address": billing_address,
       "cardholder_name": customer["customer"]["given_name"] + " " + customer["customer"]["family_name"]
-    })
-    return execute("POST", url, body_data) 
+    }
+    return execute("POST", url, json.dumps(body_data)) 
 
 def card_delete(customer_id, card_id):
     url = "https://connect.squareup.com/v2/customers/%s/cards/%s" % (customer_id, card_id)
@@ -107,6 +106,14 @@ def execute(mthd, url, body_data=None):
         response = unirest.delete(url, headers={ "Authorization": "Bearer "+access_token, "Accept": "application/json" })
     return response.body
 
+
+def error_checks(res):
+    try:
+        error = res["errors"]
+    except:
+        return res
+    else:
+        return error
 
     # TEST CODE
     # square_nonce = "CBASEPnKQZGzmUfKCPhvMP5dqI8"
