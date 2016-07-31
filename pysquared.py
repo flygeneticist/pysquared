@@ -2,6 +2,11 @@ import unirest
 import uuid
 import json
 
+# ~~~ LOCATION METHODS ~~~
+def location_lookup():
+    url = "https://connect.squareup.com/v2/locations"
+    return execute("GET", url)
+
 # ~~~ TRANSACTION METHODS ~~~
 def transaction_lookup(location_id, transaction_id):
     url = "https://connect.squareup.com/v2/locations/%s/transactions/%s" % (location_id, transaction_id)
@@ -19,11 +24,11 @@ def transaction_charge(location_id, order_data, card_nonce=None, customer_id=Non
         raise Exception("Cannot process a transaction using both options. Choose one or the other.")
     elif card_nonce:
         body_data["card_nonce"] = card_nonce
-    elif customer_id:
-        customer = customer_lookup(customer_id)
-        card = card_lookup(card_id)
+    elif customer_id and card_id:
         body_data["customer_id"] = customer_id
         body_data["customer_card_id"] = card_id
+    else:
+        raise Exception("Cannot process the transaction with the arguments given.")
     return execute("POST", url, json.dumps(body_data))
 
 def transaction_void(location_id, transaction_id):
@@ -107,36 +112,52 @@ def execute(mthd, url, body_data=None):
     return response.body
 
 
-def error_checks(res):
-    try:
-        error = res["errors"]
-    except:
-        return res
-    else:
-        return error
-
-    # TEST CODE
-    # square_nonce = "CBASEPnKQZGzmUfKCPhvMP5dqI8"
-    # square_id = "CBASELXkqLo7TogdWUk_c0D3S3M"
-    # customer_data = { 
-    #     "given_name": "Kelvin", 
-    #     "family_name": "Killer", 
-    #     "email_address": "flygeneticist@gmail.com", 
-    #     "address": {
-    #         "address_line_1": "1234 Street", 
-    #         "address_line_2": "", 
-    #         "locality": "Austin", 
-    #         "administrative_district_level_1": "TX", 
-    #         "postal_code": "78741",
-    #         "country": "US" 
-    #     },  
-    #     "phone_number": "6099492314", 
-    #     "reference_id": "6352735", 
-    #     "note": "Website generated customer" 
-    # }
-    # if square_id == "":
-    #     square_id = customer_create(customer_data)["customer"]["id"]
-    # print square_id
-    # square_card_id = card_create(square_id, square_nonce, customer_data["address"])["card"]["id"]
-    # print square_card_id
-
+# TESTING CODE
+# square_nonce = "CBASEPnKQZGzmUfKCPhvMP5dqI8"
+# square_id = "CBASELXkqLo7TogdWUk_c0D3S3M"
+# location_id = "CBASEJwUwLaHK7XERiFJstxcAMU"
+# square_card_id = "32f81324-6c12-5603-518c-bfb89572be71"
+# customer_data = { 
+#     "given_name": "Kelvin", 
+#     "family_name": "Keller", 
+#     "email_address": "flygeneticist@gmail.com", 
+#     "address": {
+#         "address_line_1": "1234 Street", 
+#         "address_line_2": "", 
+#         "locality": "Austin", 
+#         "administrative_district_level_1": "TX", 
+#         "postal_code": "78741",
+#         "country": "US" 
+#     },  
+#     "phone_number": "6099492314", 
+#     "reference_id": "6352735", 
+#     "note": "Website generated customer" 
+# }
+# if square_id == "":
+#     square_id = customer_create(customer_data)["customer"]["id"]
+# print square_id
+# square_card_id = card_create(square_id, square_nonce, customer_data["address"])["card"]["id"]
+# print square_card_id
+# order_data = {
+# "shipping_address": {
+#     "address_line_1": "123 Main St",
+#     "locality": "San Francisco",
+#     "administrative_district_level_1": "CA",
+#     "postal_code": "94114",
+#     "country": "US"
+# },
+#     "billing_address": {
+#         "address_line_1": "1234 Street", 
+#         "address_line_2": "", 
+#         "locality": "Austin", 
+#         "administrative_district_level_1": "TX", 
+#         "postal_code": "78741",
+#         "country": "US" 
+#     },
+#     "amount_money": {
+#         "amount": 4200,
+#         "currency": "USD"
+#     }
+# }
+# square_transaction_id = transaction_charge(location_id, order_data, card_nonce=None, customer_id=square_id, card_id=square_card_id, delay=False)["transaction"]["id"]
+# print square_transaction_id
